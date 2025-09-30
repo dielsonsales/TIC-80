@@ -23,6 +23,21 @@ class Position {
   }
 }
 
+class Area {
+  constructor(initialPosition, finalPosition) {
+    this.initialPosition = initialPosition
+    this.finalPosition = finalPosition
+    this.height = finalPosition.y - initialPosition.y
+    this.width = finalPosition.x - initialPosition.x
+  }
+  isVisible() {
+    return this.initialPosition.x < SCREEN_WIDTH
+      && this.initialPosition.y < SCREEN_HEIGHT
+      && this.finalPosition.x > -1
+      && this.finalPosition.y > -1
+  }
+}
+
 class Size {
   constructor(width, height) {
     this.width = width
@@ -43,7 +58,6 @@ class Bullet {
   static speed = 2
   constructor(x, y) {
     this.position = new Position(x, y)
-    // this.length = 5
     this.color = 14
   }
   isVisible() {
