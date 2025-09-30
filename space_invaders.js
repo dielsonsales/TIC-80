@@ -31,6 +31,7 @@ class Size {
 }
 
 class SpaceShip {
+  static speed = 2
   constructor(x, y) {
     this.position = new Position(x, y)
     this.size = new Size(8, 8)
@@ -38,11 +39,12 @@ class SpaceShip {
 }
 
 class Bullet {
+  static length = 5
+  static speed = 2
   constructor(x, y) {
     this.position = new Position(x, y)
-    this.length = 5
+    // this.length = 5
     this.color = 14
-    this.speed = 2
   }
   isVisible() {
     return this.position.x > -1 && this.position.y > -1
@@ -52,9 +54,9 @@ class Bullet {
 
 function move_bullet(bullet, direction) {
 	if (direction === UP) {
-		bullet.position.y -= bullet.speed
+		bullet.position.y -= Bullet.speed
 	} else {
-		bullet.position.y += bullet.speed
+		bullet.position.y += Bullet.speed
 	}
 }
 
@@ -75,10 +77,10 @@ function TIC(){
   playerBullets = playerBullets.filter((bullet, _) => bullet.isVisible())
 
   // Checks user actions
-  if (btn(LEFT)) player.position.x -= 1
-  if (btn(RIGHT)) player.position.x += 1
-  if (btn(UP)) player.position.y -= 1
-  if (btn(DOWN)) player.position.y += 1
+  if (btn(LEFT)) player.position.x -= SpaceShip.speed
+  if (btn(RIGHT)) player.position.x += SpaceShip.speed
+  if (btn(UP)) player.position.y -= SpaceShip.speed
+  if (btn(DOWN)) player.position.y += SpaceShip.speed
 
   // Checks if user shoots
   if (btn(FIRE_BTN)) {
@@ -109,7 +111,7 @@ function TIC(){
 
   // Draws the bullets
   for (const bullet of playerBullets) {
-    line(bullet.position.x, bullet.position.y, bullet.position.x, bullet.position.y - 4, 2)
+    line(bullet.position.x, bullet.position.y, bullet.position.x, bullet.position.y - Bullet.length, 2)
   }
 
   // Debug prints
