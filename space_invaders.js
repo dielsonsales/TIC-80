@@ -50,14 +50,13 @@ class Bullet {
     return this.position.x > -1 && this.position.y > -1
       && this.position.x < SCREEN_WIDTH && this.position.y < SCREEN_HEIGHT
   }
-}
-
-function move_bullet(bullet, direction) {
-	if (direction === UP) {
-		bullet.position.y -= Bullet.speed
-	} else {
-		bullet.position.y += Bullet.speed
-	}
+  move(direction) {
+    if (direction == UP) {
+      this.position.y -= Bullet.speed
+    } else {
+      this.position.y += Bullet.speed
+    }
+  }
 }
 
 let player = new SpaceShip(
@@ -71,7 +70,7 @@ function TIC(){
 
   // Automatic movement
   for (const bullet of playerBullets) {
-    move_bullet(bullet, UP)
+    bullet.move(UP)
   }
   // Removes non-visible bullets
   playerBullets = playerBullets.filter((bullet, _) => bullet.isVisible())
