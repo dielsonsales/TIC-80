@@ -15,6 +15,8 @@ const RIGHT = 3
 const DOWN = 1
 const FIRE_BTN = 4
 const BLACK = 0
+const SPRITE_SIZE = 8
+const SPACESHIP_SIZE = SPRITE_SIZE
 
 class Position {
   constructor(x, y) {
@@ -24,49 +26,49 @@ class Position {
 }
 
 class Area {
-  constructor(initialPosition, finalPosition) {
+  constructor(initialPosition, width, height) {
     this.initialPosition = initialPosition
-    this.finalPosition = finalPosition
-    this.height = finalPosition.y - initialPosition.y
-    this.width = finalPosition.x - initialPosition.x
+    this.width = width
+    this.height = height
   }
   isVisible() {
     return this.initialPosition.x < SCREEN_WIDTH
       && this.initialPosition.y < SCREEN_HEIGHT
-      && this.finalPosition.x > -1
-      && this.finalPosition.y > -1
+      && (this.initialPosition.x + this.width) > -1
+      && (this.initialPosition.y + this.height) > -1
   }
-}
-
-class Size {
-  constructor(width, height) {
-    this.width = width
-    this.height = height
+  finalPosition() {
+    return new Position(
+      this.initialPosition.x + this.width,
+      this.initialPosition.y + this.height
+    )
+  }
+  description() {
+    return "[" + this.initialPosition.x + ", " + this.initialPosition.y + ", " + this.finalPosition().x + ", " + this.finalPosition().y + "]"
   }
 }
 
 class SpaceShip {
   static speed = 2
   constructor(x, y) {
-    this.position = new Position(x, y)
-    this.size = new Size(8, 8)
+    this.area = new Area(
+      new Position(x, y),
+      SPACESHIP_SIZE,
+      SPACESHIP_SIZE
+    )
   }
 }
 
 class Bullet {
   static length = 5
   static speed = 2
-  constructor(x, y) {
-    this.position = new Position(x, y)
+  constructor(initialPosition) {
+    this.area = new Area(initialPosition, 1, Bullet.length)
     this.color = 14
-  }
-  isVisible() {
-    return this.position.x > -1 && this.position.y > -1
-      && this.position.x < SCREEN_WIDTH && this.position.y < SCREEN_HEIGHT
   }
   move(direction) {
     if (direction == UP) {
-      this.position.y -= Bullet.speed
+      this.area.initialPosition.y -= Bullet.speed
     } else {
       this.position.y += Bullet.speed
     }
@@ -75,7 +77,7 @@ class Bullet {
 
 let player = new SpaceShip(
   SCREEN_WIDTH / 2,
-  SCREEN_HEIGHT - 8
+  SCREEN_HEIGHT - SPACESHIP_SIZE
 )
 let playerBullets = []
 
@@ -87,48 +89,57 @@ function TIC(){
     bullet.move(UP)
   }
   // Removes non-visible bullets
-  playerBullets = playerBullets.filter((bullet, _) => bullet.isVisible())
+  playerBullets = playerBullets.filter((bullet, _) => bullet.area.isVisible())
 
   // Checks user actions
-  if (btn(LEFT)) player.position.x -= SpaceShip.speed
-  if (btn(RIGHT)) player.position.x += SpaceShip.speed
-  if (btn(UP)) player.position.y -= SpaceShip.speed
-  if (btn(DOWN)) player.position.y += SpaceShip.speed
+  if (btn(LEFT)) player.area.initialPosition.x -= SpaceShip.speed
+  if (btn(RIGHT)) player.area.initialPosition.x += SpaceShip.speed
+  if (btn(UP)) player.area.initialPosition.y -= SpaceShip.speed
+  if (btn(DOWN)) player.area.initialPosition.y += SpaceShip.speed
 
   // Checks if user shoots
   if (btn(FIRE_BTN)) {
     playerBullets.push(
       new Bullet(
-        player.position.x + 4,
-        player.position.y - 4
+        new Position(
+          player.area.initialPosition.x + player.area.width / 2,
+          player.area.initialPosition.y - 4
+        )
       )
     )
   }
 
   // Prevents space from being out of bounds
-  if (player.position.x > SCREEN_WIDTH - 8) {
-    player.position.x = SCREEN_WIDTH - 8
+  if (player.area.finalPosition().x > SCREEN_WIDTH) {
+    player.area.initialPosition.x = SCREEN_WIDTH - player.area.width
   }
-  if (player.position.x < 0) {
-    player.position.x = 0
+  if (player.area.initialPosition.x < 0) {
+    player.area.initialPosition.x = 0
   }
-  if (player.position.y > SCREEN_HEIGHT - 8) {
-    player.position.y = SCREEN_HEIGHT - 8
+  if (player.area.finalPosition().y > SCREEN_HEIGHT) {
+    player.area.initialPosition.y = SCREEN_HEIGHT - player.area.height
   }
-  if (player.position.y < 0) {
-    player.position.y = 0
+  if (player.area.initialPosition.y < 0) {
+    player.area.initialPosition.y = 0
   }
 
   // Draws the player
-  spr(0, player.position.x, player.position.y)
+  spr(0, player.area.initialPosition.x, player.area.initialPosition.y)
 
   // Draws the bullets
   for (const bullet of playerBullets) {
-    line(bullet.position.x, bullet.position.y, bullet.position.x, bullet.position.y - Bullet.length, 2)
+    line(
+      bullet.area.initialPosition.x,
+      bullet.area.initialPosition.y,
+      bullet.area.initialPosition.x,
+      bullet.area.finalPosition().y,
+      2
+    )
   }
 
   // Debug prints
   print("bullets: " + playerBullets.length, 0, 0)
+  print("spaceship area: " + player.area.description(), 0, SPRITE_SIZE)
 }
 
 // <TILES>
