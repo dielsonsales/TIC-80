@@ -7,101 +7,117 @@
 // script:  js
 
 // Device constants
-const screenWidth = 240
-const screenHeight = 136
-const up = 0
-const left = 2
-const right = 3
-const down = 1
-const fire = 4
-const black = 0
+const SCREEN_WIDTH = 240
+const SCREEN_HEIGHT = 136
+const UP = 0
+const LEFT = 2
+const RIGHT = 3
+const DOWN = 1
+const FIRE_BTN = 4
+const BLACK = 0
 
-let player = {
-  x: screenWidth / 2,
-  y: screenHeight - 8
+class Position {
+  constructor(x, y) {
+    this.x = x,
+    this.y = y
+  }
+}
+
+class Size {
+  constructor(width, height) {
+    this.width = width
+    this.height = height
+  }
+}
+
+class SpaceShip {
+  constructor(x, y) {
+    this.position = new Position(x, y)
+    this.size = new Size(8, 8)
+  }
 }
 
 class Bullet {
   constructor(x, y) {
-    this.x = x
-    this.y = y
+    this.position = new Position(x, y)
     this.length = 5
     this.color = 14
     this.speed = 2
   }
   isVisible() {
-    return this.x > -1 && this.y > -1
-      && this.x < screenWidth && this.y < screenHeight
+    return this.position.x > -1 && this.position.y > -1
+      && this.position.x < SCREEN_WIDTH && this.position.y < SCREEN_HEIGHT
   }
 }
 
 function move_bullet(bullet, direction) {
-	if (direction === up) {
-		bullet.y -= bullet.speed
+	if (direction === UP) {
+		bullet.position.y -= bullet.speed
 	} else {
-		bullet.y += bullet.speed
+		bullet.position.y += bullet.speed
 	}
 }
 
-// Player's bullets
-let pBullets = []
+let player = new SpaceShip(
+  SCREEN_WIDTH / 2,
+  SCREEN_HEIGHT - 8
+)
+let playerBullets = []
 
 function TIC(){
-  cls(black)
+  cls(BLACK)
 
   // Automatic movement
-  for (let i = 0; i < pBullets.length; i++) {
-    let bullet = pBullets[i]
-    move_bullet(bullet, up)
+  for (const bullet of playerBullets) {
+    move_bullet(bullet, UP)
   }
   // Removes non-visible bullets
-  pBullets = pBullets.filter((bullet, _) => bullet.isVisible())
+  playerBullets = playerBullets.filter((bullet, _) => bullet.isVisible())
 
   // Checks user actions
-  if (btn(left)) player.x -= 1
-  if (btn(right)) player.x += 1
-  if (btn(up)) player.y -= 1
-  if (btn(down)) player.y += 1
+  if (btn(LEFT)) player.position.x -= 1
+  if (btn(RIGHT)) player.position.x += 1
+  if (btn(UP)) player.position.y -= 1
+  if (btn(DOWN)) player.position.y += 1
 
   // Checks if user shoots
-  if (btn(fire)) {
-    pBullets.push(
+  if (btn(FIRE_BTN)) {
+    playerBullets.push(
       new Bullet(
-        player.x + 4,
-        player.y - 4
+        player.position.x + 4,
+        player.position.y - 4
       )
     )
   }
 
   // Prevents space from being out of bounds
-  if (player.x > screenWidth - 8) {
-    player.x = screenWidth - 8
+  if (player.position.x > SCREEN_WIDTH - 8) {
+    player.position.x = SCREEN_WIDTH - 8
   }
-  if (player.x < 0) {
-    player.x = 0
+  if (player.position.x < 0) {
+    player.position.x = 0
   }
-  if (player.y > screenHeight - 8) {
-    player.y = screenHeight - 8
+  if (player.position.y > SCREEN_HEIGHT - 8) {
+    player.position.y = SCREEN_HEIGHT - 8
   }
-  if (player.y < 0) {
-    player.y = 0
+  if (player.position.y < 0) {
+    player.position.y = 0
   }
 
   // Draws the player
-  spr(0, player.x, player.y)
+  spr(0, player.position.x, player.position.y)
 
   // Draws the bullets
-  for (let i = 0; i < pBullets.length; i++) {
-    let bullet = pBullets[i]
-    line(bullet.x, bullet.y, bullet.x, bullet.y - 4, 2)
+  for (const bullet of playerBullets) {
+    line(bullet.position.x, bullet.position.y, bullet.position.x, bullet.position.y - 4, 2)
   }
 
   // Debug prints
-  print("bullets: " + pBullets.length, 0, 0)
+  print("bullets: " + playerBullets.length, 0, 0)
 }
 
 // <TILES>
-// 000:00000000000000000002100000c21d0000cccd000ccccdd0ccccccdd00333300
+// 000:000000000002100000c21d0000cccd000ccccdd0ccccccdd0033330000033000
 // </TILES>
 
 // <WAVES>
